@@ -88,6 +88,7 @@ const state = {
   outputMode: "cropped",
   exporting: false,
   lastExportError: "",
+  layoutObserver: null,
   swipeStartX: 0,
   swipeStartY: 0,
   swiping: false,
@@ -266,6 +267,19 @@ function bindSwipeNavigation() {
   );
 }
 
+function bindLayoutObserver() {
+  if (typeof ResizeObserver !== "function" || !ui.editorCanvasWrap) return;
+
+  const observer = new ResizeObserver(() => {
+    if (state.currentView !== "edit") return;
+    syncCanvasSize();
+  });
+
+  observer.observe(ui.editorCanvasWrap);
+  if (ui.workspace) observer.observe(ui.workspace);
+  state.layoutObserver = observer;
+}
+
 function setStep(step) {
   state.currentStep = clamp(step, 1, 3);
 
@@ -412,10 +426,12 @@ function syncCanvasSize() {
     return;
   }
 
-  const width = Math.max(320, Math.round(ui.editorCanvas.clientWidth || 320));
-  const ratioHeight = Math.max(220, Math.round(width * 0.76));
+  const wrapWidth = Math.round(ui.editorCanvasWrap?.clientWidth || ui.editorCanvas.clientWidth || 320);
+  const width = Math.max(220, wrapWidth);
+  const ratioHeight = Math.max(140, Math.round(width * 0.76));
   const wrapHeight = Math.round(ui.editorCanvasWrap?.clientHeight || ratioHeight);
-  const height = clamp(ratioHeight, 220, Math.max(220, wrapHeight - 4));
+  const availableHeight = Math.max(120, wrapHeight - 2);
+  const height = Math.min(ratioHeight, availableHeight);
 
   state.dpr = window.devicePixelRatio || 1;
   ui.editorCanvas.style.height = `${height}px`;
@@ -1083,6 +1099,7 @@ function drawOriginalPreviewToOutput() {
 function setStep1Compact(compact) {
   if (!ui.step1Card) return;
   ui.step1Card.classList.toggle("is-compact", Boolean(compact));
+  window.setTimeout(syncCanvasSize, 0);
 }
 
 function setExporting(isExporting) {
@@ -1387,6 +1404,7 @@ function bindEvents() {
 
   bindDropzone();
   bindSwipeNavigation();
+  bindLayoutObserver();
 }
 
 function init() {

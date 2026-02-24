@@ -173,6 +173,37 @@ body {
   display: none;
 }
 
+#step1Card.is-compact .step-card-head {
+  margin-bottom: 0.32rem;
+}
+
+#step1Card.is-compact .upload-summary {
+  grid-template-columns: 46px 1fr;
+  gap: 0.45rem;
+}
+
+#step1Card.is-compact .upload-summary img {
+  width: 46px;
+  height: 46px;
+}
+
+#step1Card.is-compact .upload-summary-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+#step1Card.is-compact .upload-summary-meta p {
+  font-size: 0.8rem;
+}
+
+#step1Card.is-compact .upload-summary-meta .secondary {
+  min-height: 32px;
+  padding: 0.32rem 0.58rem;
+  font-size: 0.78rem;
+}
+
 #photoInput {
   display: none;
 }
@@ -257,6 +288,7 @@ body {
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 0.48rem;
+  min-height: 0;
 }
 
 .control-stack {
@@ -737,6 +769,29 @@ input:disabled {
     padding: 0.5rem;
   }
 
+  #step1Card.is-compact .upload-summary {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  #step1Card.is-compact .upload-summary img {
+    display: none;
+  }
+
+  #step1Card.is-compact .upload-summary-meta p {
+    font-size: 0.76rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 48vw;
+  }
+
+  #step1Card.is-compact .upload-summary-meta .secondary {
+    min-height: 30px;
+    font-size: 0.76rem;
+    padding: 0.28rem 0.5rem;
+  }
+
   .dropzone {
     min-height: 88px;
   }
@@ -751,6 +806,14 @@ input:disabled {
 
   .control-head {
     font-size: 0.79rem;
+  }
+
+  #step2Card {
+    grid-template-rows: auto auto minmax(180px, 1fr);
+  }
+
+  .canvas-wrap {
+    min-height: 180px;
   }
 
   .simple-check {
