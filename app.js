@@ -428,10 +428,9 @@ function syncCanvasSize() {
 
   const wrapWidth = Math.round(ui.editorCanvasWrap?.clientWidth || ui.editorCanvas.clientWidth || 320);
   const width = Math.max(220, wrapWidth);
-  const ratioHeight = Math.max(140, Math.round(width * 0.76));
-  const wrapHeight = Math.round(ui.editorCanvasWrap?.clientHeight || ratioHeight);
-  const availableHeight = Math.max(120, wrapHeight - 2);
-  const height = Math.min(ratioHeight, availableHeight);
+  const ratioHeight = Math.max(180, Math.round(width * 0.76));
+  const viewportBasedMax = Math.max(360, Math.round(window.innerHeight * 0.68));
+  const height = clamp(ratioHeight, 180, viewportBasedMax);
 
   state.dpr = window.devicePixelRatio || 1;
   ui.editorCanvas.style.height = `${height}px`;
