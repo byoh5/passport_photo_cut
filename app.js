@@ -577,7 +577,7 @@ function drawGuideLine(y, color) {
   const c = state.crop;
   editorCtx.save();
   editorCtx.setLineDash([6, 5]);
-  editorCtx.lineWidth = 1;
+  editorCtx.lineWidth = 1.2;
   editorCtx.strokeStyle = color;
   editorCtx.beginPath();
   editorCtx.moveTo(c.x, y);
@@ -586,26 +586,40 @@ function drawGuideLine(y, color) {
   editorCtx.restore();
 }
 
-function drawGuideLabel(x, y, text, color) {
+function drawGuideLabel(y, text, color, side = "left") {
+  const c = state.crop;
+  const { w: canvasW, h: canvasH } = getCanvasCssSize();
   editorCtx.save();
-  editorCtx.font = "700 12px 'Noto Sans KR', sans-serif";
+  editorCtx.font = "700 11px 'Noto Sans KR', sans-serif";
   editorCtx.textAlign = "left";
   editorCtx.textBaseline = "middle";
 
-  const padX = 8;
-  const boxH = 20;
+  const padX = 7;
+  const boxH = 18;
   const boxW = Math.ceil(editorCtx.measureText(text).width + padX * 2);
-  const boxX = x;
-  const boxY = y - boxH / 2;
+  const gap = 8;
+  const edgePad = 6;
+  let boxX = c.x - gap - boxW;
 
-  editorCtx.fillStyle = "rgba(18, 29, 45, 0.9)";
+  if (side === "right") {
+    boxX = c.x + c.w + gap;
+    if (boxX + boxW > canvasW - edgePad) {
+      boxX = Math.max(edgePad, c.x - gap - boxW);
+    }
+  } else if (boxX < edgePad) {
+    boxX = Math.min(canvasW - boxW - edgePad, c.x + c.w + gap);
+  }
+
+  const boxY = clamp(y - boxH / 2, edgePad, canvasH - boxH - edgePad);
+
+  editorCtx.fillStyle = "rgba(18, 29, 45, 0.82)";
   editorCtx.fillRect(boxX, boxY, boxW, boxH);
   editorCtx.strokeStyle = color;
   editorCtx.lineWidth = 1;
   editorCtx.strokeRect(boxX + 0.5, boxY + 0.5, boxW - 1, boxH - 1);
 
   editorCtx.fillStyle = "#ffffff";
-  editorCtx.fillText(text, boxX + padX, y + 0.5);
+  editorCtx.fillText(text, boxX + padX, boxY + boxH / 2 + 0.5);
   editorCtx.restore();
 }
 
@@ -630,27 +644,22 @@ function drawGuides() {
   drawGuideLine(headTop, "#8dd9aa");
   drawGuideLine(chinLine, "#ff9b8e");
 
-  editorCtx.fillStyle = "rgba(141, 217, 170, 0.12)";
+  editorCtx.fillStyle = "rgba(141, 217, 170, 0.08)";
   editorCtx.fillRect(c.x + 1, c.y + 1, c.w - 2, Math.max(0, headTop - c.y));
 
-  editorCtx.fillStyle = "rgba(255, 155, 142, 0.1)";
+  editorCtx.fillStyle = "rgba(255, 155, 142, 0.07)";
   editorCtx.fillRect(c.x + 1, chinLine, c.w - 2, Math.max(0, c.y + c.h - chinLine));
 
   editorCtx.restore();
 
-  const labelX = c.x + 8;
-  drawGuideLabel(labelX, headTop, "정수리 기준선", "#8dd9aa");
-  drawGuideLabel(labelX, chinLine, "턱끝 기준선", "#ff9b8e");
-  drawGuideLabel(c.x + c.w - 90, c.y + 14, "중심선", "#9edcec");
+  const { w: canvasW } = getCanvasCssSize();
+  const leftSpace = c.x;
+  const rightSpace = canvasW - (c.x + c.w);
+  const labelSide = leftSpace >= rightSpace ? "left" : "right";
 
-  editorCtx.save();
-  editorCtx.fillStyle = "rgba(22, 47, 69, 0.75)";
-  editorCtx.fillRect(c.x + c.w - 156, c.y + c.h - 26, 148, 18);
-  editorCtx.fillStyle = "#ffffff";
-  editorCtx.font = "600 10px 'Noto Sans KR', sans-serif";
-  editorCtx.textAlign = "left";
-  editorCtx.fillText("정수리~턱 3.2cm 기준", c.x + c.w - 150, c.y + c.h - 14);
-  editorCtx.restore();
+  drawGuideLabel(headTop, "정수리선", "#8dd9aa", labelSide);
+  drawGuideLabel(chinLine, "턱끝선", "#ff9b8e", labelSide);
+  drawGuideLabel(c.y + 14, "중심선", "#9edcec", labelSide);
 }
 
 function drawEditor() {
