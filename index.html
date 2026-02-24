@@ -25,7 +25,8 @@
         <button id="viewInfoBtn" type="button">규정</button>
       </nav>
 
-      <main class="workspace">
+      <main id="workspace" class="workspace">
+        <div id="workspaceTrack" class="workspace-track">
         <section id="editView" class="app-view is-active" aria-label="편집 화면">
           <section class="panel workflow-panel">
             <article id="step1Card" class="step-card is-active">
@@ -153,7 +154,7 @@
           </section>
         </section>
 
-        <section id="resultView" class="app-view" aria-label="결과 화면">
+        <section id="resultView" class="app-view" aria-label="결과 화면" aria-hidden="true">
           <section id="step3Card" class="panel result-panel step-card is-locked" aria-disabled="true">
             <div class="result-head">
               <h2>3. 결과 확인/다운로드</h2>
@@ -179,7 +180,7 @@
           </section>
         </section>
 
-        <section id="infoView" class="app-view" aria-label="규정 화면">
+        <section id="infoView" class="app-view" aria-label="규정 화면" aria-hidden="true">
           <section class="panel regulations" id="regulations">
             <header class="reg-head">
               <h2>규정 요약</h2>
@@ -234,6 +235,7 @@
             </div>
           </section>
         </section>
+        </div>
       </main>
     </div>
 

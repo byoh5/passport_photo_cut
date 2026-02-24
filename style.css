@@ -98,16 +98,24 @@ body {
 .workspace {
   min-height: 0;
   position: relative;
+  overflow: hidden;
+}
+
+.workspace-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  transform: translateX(calc(var(--view-index, 0) * -100%));
+  transition: transform 240ms ease;
+  will-change: transform;
 }
 
 .app-view {
-  display: none;
+  display: block;
+  flex: 0 0 100%;
+  min-width: 0;
   width: 100%;
   height: 100%;
-}
-
-.app-view.is-active {
-  display: block;
 }
 
 .panel {

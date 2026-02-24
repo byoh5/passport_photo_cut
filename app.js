@@ -16,6 +16,9 @@ const HEAD_LENGTH_CM = 3.2;
 const GUIDE_HEAD_TOP_RATIO = TOP_MARGIN_CM / PASSPORT_PHOTO_HEIGHT_CM;
 const GUIDE_HEAD_LENGTH_RATIO = HEAD_LENGTH_CM / PASSPORT_PHOTO_HEIGHT_CM;
 const EXPORT_BUTTON_LABEL = "✨ 결과 만들기";
+const VIEW_ORDER = ["edit", "result", "info"];
+const SWIPE_MIN_DISTANCE = 52;
+const SWIPE_MAX_VERTICAL_DRIFT = 42;
 
 const ui = {
   photoInput: document.getElementById("photoInput"),
@@ -28,6 +31,8 @@ const ui = {
   viewEditBtn: document.getElementById("viewEditBtn"),
   viewResultBtn: document.getElementById("viewResultBtn"),
   viewInfoBtn: document.getElementById("viewInfoBtn"),
+  workspace: document.getElementById("workspace"),
+  workspaceTrack: document.getElementById("workspaceTrack"),
   editView: document.getElementById("editView"),
   resultView: document.getElementById("resultView"),
   infoView: document.getElementById("infoView"),
@@ -83,6 +88,9 @@ const state = {
   outputMode: "cropped",
   exporting: false,
   lastExportError: "",
+  swipeStartX: 0,
+  swipeStartY: 0,
+  swiping: false,
 };
 
 function clamp(value, min, max) {
@@ -154,10 +162,28 @@ function applyStateClass(node, stepIndex) {
 function setActiveView(view) {
   const next = view === "result" || view === "info" ? view : "edit";
   state.currentView = next;
+  const activeIndex = VIEW_ORDER.indexOf(next);
+  const trackIndex = activeIndex >= 0 ? activeIndex : 0;
 
-  if (ui.editView) ui.editView.classList.toggle("is-active", next === "edit");
-  if (ui.resultView) ui.resultView.classList.toggle("is-active", next === "result");
-  if (ui.infoView) ui.infoView.classList.toggle("is-active", next === "info");
+  if (ui.workspaceTrack) {
+    ui.workspaceTrack.style.setProperty("--view-index", String(trackIndex));
+  }
+  if (ui.workspace) {
+    ui.workspace.setAttribute("data-view", next);
+  }
+
+  if (ui.editView) {
+    ui.editView.classList.toggle("is-active", next === "edit");
+    ui.editView.setAttribute("aria-hidden", next === "edit" ? "false" : "true");
+  }
+  if (ui.resultView) {
+    ui.resultView.classList.toggle("is-active", next === "result");
+    ui.resultView.setAttribute("aria-hidden", next === "result" ? "false" : "true");
+  }
+  if (ui.infoView) {
+    ui.infoView.classList.toggle("is-active", next === "info");
+    ui.infoView.setAttribute("aria-hidden", next === "info" ? "false" : "true");
+  }
 
   if (ui.viewEditBtn) ui.viewEditBtn.classList.toggle("is-active", next === "edit");
   if (ui.viewResultBtn) ui.viewResultBtn.classList.toggle("is-active", next === "result");
@@ -166,6 +192,78 @@ function setActiveView(view) {
   if (next === "edit") {
     window.setTimeout(syncCanvasSize, 0);
   }
+}
+
+function moveViewByOffset(offset) {
+  const currentIndex = VIEW_ORDER.indexOf(state.currentView);
+  if (currentIndex < 0) return;
+  const nextIndex = clamp(currentIndex + offset, 0, VIEW_ORDER.length - 1);
+  if (nextIndex === currentIndex) return;
+  setActiveView(VIEW_ORDER[nextIndex]);
+}
+
+function shouldIgnoreSwipeTarget(target) {
+  if (!(target instanceof Element)) return true;
+
+  return Boolean(target.closest("input, button, a, label, canvas, .dropzone, [data-adjust-control]"));
+}
+
+function bindSwipeNavigation() {
+  if (!ui.workspace) return;
+
+  ui.workspace.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches.length !== 1) {
+        state.swiping = false;
+        return;
+      }
+
+      if (shouldIgnoreSwipeTarget(event.target)) {
+        state.swiping = false;
+        return;
+      }
+
+      const touch = event.touches[0];
+      state.swipeStartX = touch.clientX;
+      state.swipeStartY = touch.clientY;
+      state.swiping = true;
+    },
+    { passive: true },
+  );
+
+  ui.workspace.addEventListener(
+    "touchend",
+    (event) => {
+      if (!state.swiping || event.changedTouches.length === 0) {
+        state.swiping = false;
+        return;
+      }
+
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - state.swipeStartX;
+      const deltaY = touch.clientY - state.swipeStartY;
+      state.swiping = false;
+
+      if (Math.abs(deltaX) < SWIPE_MIN_DISTANCE) return;
+      if (Math.abs(deltaY) > SWIPE_MAX_VERTICAL_DRIFT) return;
+
+      if (deltaX < 0) {
+        moveViewByOffset(1);
+      } else {
+        moveViewByOffset(-1);
+      }
+    },
+    { passive: true },
+  );
+
+  ui.workspace.addEventListener(
+    "touchcancel",
+    () => {
+      state.swiping = false;
+    },
+    { passive: true },
+  );
 }
 
 function setStep(step) {
@@ -1288,6 +1386,7 @@ function bindEvents() {
   window.addEventListener("resize", syncCanvasSize);
 
   bindDropzone();
+  bindSwipeNavigation();
 }
 
 function init() {
