@@ -7,128 +7,235 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./style.css?v=20260224-2" />
   </head>
   <body>
-    <header class="hero">
-      <h1>대한민국 여권사진 컷팅 가이드</h1>
-      <p>
-        공식 규정 비율(3.5 x 4.5cm)을 유지한 상태에서 크롭 프레임을 조절하고,
-        결과를 자동으로 413 x 531px JPEG로 출력합니다.
-      </p>
-    </header>
+    <div class="app-shell">
+      <header class="hero">
+        <h1>대한민국 여권사진 컷팅</h1>
+        <p>여권사진을 규정 비율(3.5 x 4.5)로 맞추고 413 x 531 JPG로 저장하는 도구입니다.</p>
+      </header>
 
-    <main class="layout">
-      <section class="panel editor-panel">
-        <h2>1) 사진 올리고 프레임 맞추기</h2>
-        <div class="controls">
-          <label class="file-input-label" for="photoInput">사진 선택</label>
-          <input id="photoInput" type="file" accept="image/*" />
+      <nav class="view-tabs" aria-label="화면 탭">
+        <button id="viewEditBtn" class="is-active" type="button">편집</button>
+        <button id="viewResultBtn" type="button">결과</button>
+        <button id="viewInfoBtn" type="button">규정</button>
+      </nav>
 
-          <label class="inline-control">
-            프레임 크기
-            <input id="frameScale" type="range" min="35" max="100" value="75" />
-          </label>
+      <main class="workspace">
+        <section id="editView" class="app-view is-active" aria-label="편집 화면">
+          <section class="panel workflow-panel">
+            <article id="step1Card" class="step-card is-active">
+              <div class="step-card-head">
+                <h2>1. 사진 업로드</h2>
+              </div>
 
-          <label class="inline-check">
-            <input id="showGuides" type="checkbox" checked />
-            얼굴 가이드 표시
-          </label>
+              <input id="photoInput" type="file" accept="image/*" />
+              <label id="dropzone" class="dropzone" for="photoInput">
+                <span class="dropzone-icon" aria-hidden="true">📷</span>
+                <strong>드래그 또는 클릭 업로드</strong>
+                <small>JPG/PNG</small>
+              </label>
 
-          <div class="button-row">
-            <button id="centerFrameBtn" type="button">프레임 중앙 정렬</button>
-            <button id="resetFrameBtn" type="button">프레임 초기화</button>
-            <button id="exportBtn" type="button" class="primary">결과 만들기</button>
-          </div>
-        </div>
+              <div id="uploadSummary" class="upload-summary" hidden>
+                <img id="uploadThumb" alt="업로드된 사진 썸네일" />
+                <div class="upload-summary-meta">
+                  <p id="uploadName">사진 준비됨</p>
+                  <button id="changePhotoBtn" type="button" class="secondary">다른 사진 선택</button>
+                </div>
+              </div>
 
-        <div class="canvas-wrap">
-          <canvas id="editorCanvas" aria-label="여권사진 크롭 편집 캔버스"></canvas>
-          <p class="hint">
-            데스크톱: 마우스 휠로 프레임 크기 조절, 프레임 드래그로 위치 이동
-            <br />
-            모바일: 프레임 드래그 + 슬라이더로 크기 조절
-          </p>
-        </div>
-      </section>
+              <button id="loadDemoBtn" type="button" class="text-button">샘플로 시작하기</button>
+            </article>
 
-      <section class="panel output-panel">
-        <h2>2) 결과 확인</h2>
-        <div class="output-meta">
-          <div>출력 규격: <strong>413 x 531px</strong> (JPG/JPEG)</div>
-          <div>비율: <strong>3.5 : 4.5</strong></div>
-          <div id="fileInfo">파일 크기: 생성 전</div>
-        </div>
+            <article id="step2Card" class="step-card is-locked" aria-disabled="true">
+              <div class="step-card-head">
+                <h2>2. 위치 조정</h2>
+              </div>
 
-        <div class="output-preview-box">
-          <canvas id="outputCanvas" width="413" height="531" aria-label="결과 미리보기"></canvas>
-        </div>
+              <p id="step2LockNote" class="lock-note">사진 업로드 후 활성화됩니다.</p>
 
-        <a id="downloadLink" class="download-link" download="passport-photo-413x531.jpg">결과 다운로드</a>
-        <p class="disclaimer">
-          이 도구의 선 가이드는 촬영/정렬 보조용이며, 최종 접수 가능 여부는 여권 심사 기준에 따라 결정됩니다.
-        </p>
-      </section>
-    </main>
+              <div class="control-stack">
+                <div class="control-card span-2">
+                  <div class="control-head">
+                    <label for="frameScale">프레임 크기</label>
+                    <strong id="frameScaleValue">75.0%</strong>
+                  </div>
+                  <input
+                    id="frameScale"
+                    type="range"
+                    min="35"
+                    max="100"
+                    step="0.1"
+                    value="75"
+                    data-adjust-control
+                  />
+                </div>
 
-    <section class="panel regulations" id="regulations">
-      <h2>공식 규정 요약 및 참고 링크</h2>
-      <ul>
-        <li>여권 사진 크기: 3.5cm x 4.5cm</li>
-        <li>머리 길이(정수리~턱): 3.2cm ~ 3.6cm</li>
-        <li>배경: 균일한 흰색, 테두리 없음</li>
-        <li>얼굴/어깨 정면, 무표정, 치아 노출 불가</li>
-        <li>온라인 권장 파일: 413 x 531px, JPG/JPEG, 500KB 이하</li>
-      </ul>
+                <div class="control-card">
+                  <div class="control-head">
+                    <span>이미지 회전</span>
+                    <strong id="rotationValue">0.0°</strong>
+                  </div>
+                  <div class="rotation-quick">
+                    <button
+                      id="rotateLeftBtn"
+                      type="button"
+                      class="icon-round"
+                      aria-label="이미지를 좌측으로 90도 회전"
+                      data-adjust-control
+                    >
+                      ↺
+                    </button>
+                    <button
+                      id="rotateRightBtn"
+                      type="button"
+                      class="icon-round"
+                      aria-label="이미지를 우측으로 90도 회전"
+                      data-adjust-control
+                    >
+                      ↻
+                    </button>
+                  </div>
+                </div>
 
-      <div class="example-grid">
-        <article class="example-card ok">
-          <h3>권장 예시</h3>
-          <div class="sample-photo">
-            <svg viewBox="0 0 350 450" role="img" aria-label="권장 여권사진 예시">
-              <rect x="0" y="0" width="350" height="450" fill="#ffffff" />
-              <ellipse cx="175" cy="230" rx="88" ry="120" fill="#e7d8c8" />
-              <rect x="95" y="314" width="160" height="100" rx="24" fill="#96a698" />
-              <line x1="40" y1="180" x2="310" y2="180" stroke="#2f8f59" stroke-dasharray="8 7" stroke-width="3" />
-              <line x1="40" y1="290" x2="310" y2="290" stroke="#2f8f59" stroke-dasharray="8 7" stroke-width="3" />
-              <line x1="175" y1="36" x2="175" y2="414" stroke="#4a7180" stroke-dasharray="8 7" stroke-width="2" />
-            </svg>
-          </div>
-          <p>정면 시선, 얼굴 윤곽 노출, 균일한 흰 배경, 과도한 보정 없음</p>
-        </article>
-        <article class="example-card bad">
-          <h3>주의 예시</h3>
-          <div class="sample-photo">
-            <svg viewBox="0 0 350 450" role="img" aria-label="주의 여권사진 예시">
-              <rect x="0" y="0" width="350" height="450" fill="#ece9e4" />
-              <ellipse cx="165" cy="268" rx="68" ry="94" fill="#dcc9b3" />
-              <rect x="80" y="330" width="155" height="95" rx="24" fill="#8a9fb6" />
-              <line x1="26" y1="208" x2="324" y2="208" stroke="#bf4f4f" stroke-dasharray="8 6" stroke-width="3" />
-              <line x1="26" y1="350" x2="324" y2="350" stroke="#bf4f4f" stroke-dasharray="8 6" stroke-width="3" />
-              <line x1="268" y1="0" x2="350" y2="90" stroke="#bf4f4f" stroke-width="16" />
-              <line x1="0" y1="360" x2="94" y2="450" stroke="#bf4f4f" stroke-width="16" />
-            </svg>
-          </div>
-          <p>배경 제거/합성, 얼굴 왜곡 보정, 그림자 과다, 머리카락으로 윤곽 가림</p>
-        </article>
-      </div>
+                <div class="control-card">
+                  <div class="control-head">
+                    <label for="rotationRange">기울기</label>
+                    <span class="tilt-meta">
+                      <strong id="tiltValue">0.0°</strong>
+                      <button
+                        id="resetRotationBtn"
+                        type="button"
+                        class="mini-icon"
+                        aria-label="0도로 초기화"
+                        data-adjust-control
+                      >
+                        ⟲
+                      </button>
+                    </span>
+                  </div>
+                  <input
+                    id="rotationRange"
+                    type="range"
+                    min="-5"
+                    max="5"
+                    step="0.1"
+                    value="0"
+                    data-adjust-control
+                  />
+                </div>
 
-      <div class="link-list">
-        <a href="https://www.passport.go.kr/home/kor/contents.do?menuPos=32" target="_blank" rel="noopener noreferrer">
-          외교부 여권사진 규격 안내 (공식)
-        </a>
-        <a href="https://www.passport.go.kr/home/kor/contents.do?menuPos=12" target="_blank" rel="noopener noreferrer">
-          온라인용 사진파일 안내 (공식)
-        </a>
-      </div>
-    </section>
+                <label class="simple-check span-2">
+                  <input id="showGuides" type="checkbox" checked data-adjust-control />
+                  가이드 표시 (저장 이미지 제외)
+                </label>
 
-    <footer class="footer">
-      <small>Built for GitHub Pages • Mobile/Desktop responsive</small>
-    </footer>
+                <div class="action-row span-2">
+                  <button id="centerFrameBtn" type="button" class="secondary" data-adjust-control>
+                    가운데 정렬
+                  </button>
+                  <button id="exportBtn" type="button" class="primary" data-adjust-control>
+                    ✨ 결과 만들기
+                  </button>
+                </div>
+
+                <p id="statusMessage" class="status-message span-2" role="status" aria-live="polite"></p>
+              </div>
+
+              <div id="editorCanvasWrap" class="canvas-wrap">
+                <canvas id="editorCanvas" aria-label="여권사진 크롭 편집 캔버스"></canvas>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section id="resultView" class="app-view" aria-label="결과 화면">
+          <section id="step3Card" class="panel result-panel step-card is-locked" aria-disabled="true">
+            <div class="result-head">
+              <h2>3. 결과 확인/다운로드</h2>
+              <a id="downloadLink" class="download-link" download="passport-photo-413x531.jpg">⬇ JPG 다운로드</a>
+            </div>
+
+            <div class="output-meta">
+              <div><span>출력</span><strong>413 x 531 JPG</strong></div>
+              <div><span>파일 크기</span><strong id="fileInfo">생성 전</strong></div>
+            </div>
+
+            <div class="output-preview-box">
+              <canvas id="outputCanvas" width="413" height="531" aria-label="결과 미리보기"></canvas>
+              <div id="processingOverlay" class="processing-overlay" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <span>결과 만드는 중…</span>
+              </div>
+            </div>
+
+            <p class="disclaimer">
+              가이드선은 정렬 보조용이며 저장 이미지에는 포함되지 않습니다.
+            </p>
+          </section>
+        </section>
+
+        <section id="infoView" class="app-view" aria-label="규정 화면">
+          <section class="panel regulations" id="regulations">
+            <header class="reg-head">
+              <h2>규정 요약</h2>
+              <p>접수 가능성 판단에 가장 중요한 항목만 빠르게 확인하세요.</p>
+            </header>
+
+            <div class="reg-grid">
+              <article class="reg-card">
+                <h3>필수 크기</h3>
+                <ul class="reg-list">
+                  <li>사진 비율 3.5cm x 4.5cm</li>
+                  <li>온라인 제출 413 x 531px</li>
+                  <li>JPG/JPEG, 500KB 이하</li>
+                </ul>
+              </article>
+
+              <article class="reg-card">
+                <h3>얼굴 기준</h3>
+                <ul class="reg-list">
+                  <li>정수리~턱 3.2cm~3.6cm</li>
+                  <li>정면 응시, 고개 기울임 없음</li>
+                  <li>무표정(입 다물고 치아 비노출)</li>
+                </ul>
+              </article>
+
+              <article class="reg-card sample-card">
+                <h3>권장 정렬 예시</h3>
+                <div class="sample-photo">
+                  <img src="./image%20copy.png" alt="권장 여권사진 예시" />
+                </div>
+                <p class="sample-caption">정수리선/턱끝선/중심선을 맞춘 예시</p>
+              </article>
+            </div>
+
+            <div class="reg-footer">
+              <article class="reg-card bg-help">
+                <h3><span class="warn-icon" aria-hidden="true"></span> 주의!</h3>
+                <p>
+                  배경이 흰색이 아닌경우 접수에서 반려됩니다. 아래 사이트에서 배경 삭제가 가능합니다.
+                </p>
+                <a href="https://www.remove.bg/ko" target="_blank" rel="noopener noreferrer">remove.bg에서 배경 정리하기</a>
+              </article>
+
+              <div class="link-list">
+                <a href="https://www.passport.go.kr/home/kor/contents.do?menuPos=32" target="_blank" rel="noopener noreferrer">
+                  외교부 여권사진 규격 안내
+                </a>
+                <a href="https://www.passport.go.kr/home/kor/contents.do?menuPos=12" target="_blank" rel="noopener noreferrer">
+                  온라인 사진파일 안내
+                </a>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
 
     <script src="./app.js"></script>
   </body>
