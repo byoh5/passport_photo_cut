@@ -74,6 +74,23 @@ body {
   color: rgba(232, 241, 255, 0.95);
 }
 
+.top-ad {
+  display: flex;
+  justify-content: center;
+  padding: 0.1rem 0;
+}
+
+.top-ad-slot {
+  width: min(100%, 320px);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.top-ad-slot .kakao_ad_area {
+  margin: 0 auto;
+}
+
 .view-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -760,6 +777,10 @@ input:disabled {
   .hero p {
     font-size: 0.8rem;
     margin-top: 0.28rem;
+  }
+
+  .top-ad {
+    padding: 0;
   }
 
   .view-tabs button {
